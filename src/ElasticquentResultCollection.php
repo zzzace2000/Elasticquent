@@ -49,6 +49,7 @@ class ElasticquentResultCollection extends \Illuminate\Database\Eloquent\Collect
         foreach ($this->hits['hits'] as $hit) {
             $items[] = $instance->newFromHitBuilder($hit);
         }
+        unset($this->hits['hits']);
 
         return $items;
     }
