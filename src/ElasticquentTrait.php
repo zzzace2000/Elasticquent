@@ -527,10 +527,11 @@ trait ElasticquentTrait
         $attributes = $hit['_source'];
 
         // Add index, type, highlight into this attributes
-        $attributes['_index'] = $hit['_index'];
         $attributes['_type'] = $hit['_type'];
         $attributes['_score'] = $hit['_score'];
-        $attributes['highlight'] = $hit['highlight'];
+        if (!empty($hit['highlight'])) {
+            $attributes['highlight'] = $hit['highlight'];
+        }
 
         // Add fields to attributes
         if (isset($hit['fields'])) {
