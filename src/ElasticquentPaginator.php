@@ -15,7 +15,7 @@ class ElasticquentPaginator extends Paginator
      * @param  int|null  $currentPage
      * @param  array  $options (path, query, fragment, pageName)
      */
-    public function __construct($items, $hits, $total, $perPage, $currentPage = null, array $options = [])
+    public function __construct($items, $aggregations, $hits, $total, $perPage, $currentPage = null, array $options = [])
     {
         foreach ($options as $key => $value) {
             $this->{$key} = $value;
@@ -26,6 +26,7 @@ class ElasticquentPaginator extends Paginator
         $this->currentPage = $this->setCurrentPage($currentPage, $this->lastPage);
         $this->path = $this->path != '/' ? rtrim($this->path, '/') . '/' : $this->path;
         $this->items = $items instanceof Collection ? $items : Collection::make($items);
+        $this->aggregations = $aggregations;
         $this->hits = $hits;
     }
 
@@ -36,7 +37,13 @@ class ElasticquentPaginator extends Paginator
      */
     public function toArray()
     {
-        return [
+        $result = [];
+
+        if (!empty($this->aggregations)) {
+            $result['aggregations'] = $this->aggregations;
+        }
+
+        $others = [
             'total'         => $this->total(),
             'per_page'      => $this->perPage(),
             'current_page'  => $this->currentPage(),
@@ -48,5 +55,9 @@ class ElasticquentPaginator extends Paginator
             'hits'          => $this->hits,
             'data'          => $this->items->toArray(),
         ];
+
+        $result = array_merge($result, $others);
+
+        return $result;
     }
 }
