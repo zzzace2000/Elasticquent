@@ -9,15 +9,15 @@ class ElasticquentResultCollection extends \Illuminate\Database\Eloquent\Collect
     protected $shards;
     protected $hits;
     protected $aggregations = null;
-    protected $instance;
+    protected $map_model;
 
     /**
-     * Create a new instance containing Elasticsearch results
+     * Create a new map_model containing Elasticsearch results
      *
      * @param $results elasticsearch results
-     * @param $instance
+     * @param $map_model
      */
-    public function __construct($results, $instance)
+    public function __construct($results, $map_model)
     {
         // Take our result data and map it
         // to some class properties.
@@ -27,27 +27,29 @@ class ElasticquentResultCollection extends \Illuminate\Database\Eloquent\Collect
         $this->hits         = $results['hits'];
         $this->aggregations = isset($results['aggregations']) ? $results['aggregations'] : array();
 
-        // Save the instance we performed the search on.
-        $this->instance = $instance;
+        // Save the map_model we performed the search on.
+        $this->map_model = $map_model;
 
         // Now we need to assign our hits to the
         // items in the collection.
-        $this->items = $this->hitsToItems($instance);
+        $this->items = $this->hitsToItems($map_model);
     }
 
     /**
      * Hits To Items
      *
-     * @param Eloquent model instance $instance
+     * @param Eloquent model map_model $map_model
      *
      * @return array
      */
-    private function hitsToItems($instance)
+    private function hitsToItems($map_model)
     {
         $items = array();
 
         foreach ($this->hits['hits'] as $hit) {
-            $items[] = $instance->newFromHitBuilder($hit);
+            $model = $map_model[$hit['_type']];
+
+            $items[] = $model->newFromHitBuilder($hit);
         }
         unset($this->hits['hits']);
 
